@@ -9,7 +9,7 @@ Three different models were tested to determine the user's intention in his phra
 - Logistic Regression (model score = 0.3884)
 - Random forest Classifier (model score = 0.8281) 
 - MLP Classifier (model score = 0.8247) <br>
-So, I decided to use MLP Classifier.
+So, I decided to use Random forest Classifier because it is faster and less GPU expensive.
 
 ## Input Data Preparation filter_text():
 The input word (phrase) is lowered to lower case then spaces and punctuation marks are removed from it. 
@@ -18,11 +18,16 @@ The input word (phrase) is lowered to lower case then spaces and punctuation mar
 Two words are compared: the input and which the model predicts in the body of this function.
 
 ## Main Logic Func bot():
-- 1) Filter input data;
-- 2) Try to find the answer directly in the dictionary;
-- 3) If not - use ML model intent predictiction and take the random answer example from this intent group;
-- 4) Or use the Failure Phrases if the model score is not enough in any case.
-- 5) Repit until input phrase == one of exit_phrases.
+1. Filter input data;
+2. Try to find the answer directly in the dictionary;
+3. If not - use ML model intent predictiction and take the random answer example from this intent group;
+4. Or use the Failure Phrases if the model score is not enough in any case.
+5. Repit until input phrase == one of exit_phrases.
 
 ### Bot conversation example:
-![image](https://user-images.githubusercontent.com/57821178/170299578-90d76e38-1a78-4fce-8a43-b945c403f658.png)
+## Server output:
+![image](https://user-images.githubusercontent.com/57821178/170508597-dfba3ccd-40d1-4268-81c1-c7f32be1b43a.png)
+As you can see, users names are shown.
+## Telegram Output:
+![image](https://user-images.githubusercontent.com/57821178/170508918-813fc066-a24c-4f5a-b348-be7442faab0f.png)
+

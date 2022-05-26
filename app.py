@@ -125,44 +125,51 @@ def bot(phrase):
 
 ## TG Bot server logic func ##
 def bot_telegram_reply(update: Update, ctx):
-    
-    text = update.message.text
     exit_phrases = ["Выйти", "Выключись", "Стоп", "Stop", "Finish", "Exit", "выйти", "выключись", "стоп", "stop", "finish", "exit"]
 
-    if text in exit_phrases:
-        update.message.reply_text("Bye-Bye")
-        exit()
+    text = update.message.text
+    if text == "/start" or text == "\start":
+        update.message.reply_text("Привет! Давай пообщаемся :) ")
+        update.message.reply_text("Напиши мне что-то, а я постараюсь ответить в тему) ")
+        update.message.reply_text("Я пока не умею поддерживать полноценный диалог и только отвечаю на каждую фразу отдельно, но скоро научусь!!")
+        update.message.reply_text("Или напиши 'Стоп' когда устанешь ")
+    else:
+        if text in exit_phrases:
+            update.message.reply_text("Bye-Bye")
+            update.message.reply_text("Не забудь перезапустить бота, если захочешь поболтать еще ;)")
+            exit()
+        reply = bot(text)
+        update.message.reply_text(reply)
+        name = update.message.chat.full_name
+        print(f"[{name}] {text}: {reply}")
 
-    reply = bot(text)
-    update.message.reply_text(reply)
-    name = update.message.chat.full_name
-    print(f"[{name}] {text}: {reply}")
 
+if __name__ == '__main__':
+     # Open bot dictionary #
+    config_file = open("big_bot_config.json", "r") 
+    BIG_CONFIG = json.load(config_file)
 
+    ## Use ML func ##
+    model, vectorizer = get_model(BIG_CONFIG)
 
-# Open bot dictionary #
-config_file = open("big_bot_config.json", "r") 
-BIG_CONFIG = json.load(config_file)
+    ## Conect to TG server ##
+    f = open('BOT_KEY.txt')
+    BOT_KEY = f.read()
+    upd = Updater(BOT_KEY)
 
-## Use ML func ##
-model, vectorizer = get_model(BIG_CONFIG)
+    while True:
+        ## Create MessageHandler ##
+        handler = MessageHandler(Filters.text, bot_telegram_reply)
 
-## Conect to TG server ##
-f = open('BOT_KEY.txt')
-BOT_KEY = f.read()
-upd = Updater(BOT_KEY)
+        ## Register MessageHandler to Updater ##
+        upd.dispatcher.add_handler(handler)
 
-## Create MessageHandler ##
-handler = MessageHandler(Filters.text, bot_telegram_reply)
+        print("It works")
 
-## Register MessageHandler to Updater ##
-upd.dispatcher.add_handler(handler)
+        ## Start polling TG server ##
 
-print("It works")
+        upd.start_polling()
+        upd.idle()
+  
 
-## Start polling TG server ##
-
-upd.start_polling()
-upd.idle()
-
-exit()
+    # exit()
