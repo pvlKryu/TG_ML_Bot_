@@ -1,18 +1,16 @@
 ### The goal is to determine the user's intention by the input text and give the random answer from correct intent###
-
 from distutils.log import Log
 import json, re, nltk, random
 from math import fabs
+from numpy import vectorize
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
+from telegram import Update
+from telegram.ext import Updater, MessageHandler, Filters
 
-def main():
-    # Open bot dictionary #
-    config_file = open("big_bot_config.json", "r") 
-    BIG_CONFIG = json.load(config_file)
-
+def get_model(BIG_CONFIG):
     ### dict_keys(['intents', 'failure_phrases']) ###
     X = [] # Phrases
     y = [] # Intents
@@ -28,42 +26,36 @@ def main():
     ### Preparing data for model training ###
 
     ## NLP Vectorization using SKlearn ##
+
     vectorizer = CountVectorizer()
     vectorizer.fit(X)
 
     ### ML ###
     # Text classification = class (intent) predictions by text (phrase) #
 
-    ## 1) Log Reg using SKlearn - Not effective ##
+        ## 1) Log Reg using SKlearn - Not effective ##
 
-    # model = LogisticRegression()
-    # vecX = vectorizer.transform(X) 
-    # model.fit(vecX,y)
-    # print(model.score(vecX, y))
+        # model = LogisticRegression()
+        # vecX = vectorizer.transform(X) 
+        # model.fit(vecX,y)
+        # print(model.score(vecX, y))
 
-    # model score = 0.3884 :( bad
+        # model score = 0.3884 :( bad
 
-    ## 2) Random forest Classifier - Not bad ##
-    # model = RandomForestClassifier()
-    # vecX = vectorizer.transform(X) 
-    # model.fit(vecX,y)
-    # print(model.score(vecX, y))
-
-    # model score = 0.8281 :) much better
-
-    ## 3) MLP Classifier - best model
-    model = MLPClassifier()
+    ## 2) Random forest Classifier - Best model ##
+    model = RandomForestClassifier()
     vecX = vectorizer.transform(X) 
     model.fit(vecX,y)
     # print(model.score(vecX, y))
-    # model score = 0.8247 :) same as Random forest Classifier 
+    # model score = 0.8281 :) Best result
 
-    exit_phrases = ["Выйти", "Выключись", "Стоп", "Stop", "Finish", "Exit", "выйти", "выключись", "стоп", "stop", "finish", "exit"]
-    print("Put your message: ")
-    msg = ""
-    while not msg in exit_phrases:
-        msg = input()
-        print("[BOT]: " + bot(msg, BIG_CONFIG, model, vectorizer))
+        ## 3) MLP Classifier - not bad but too long and GPU expensive ##
+        # model = MLPClassifier()
+        # vecX = vectorizer.transform(X) 
+        # model.fit(vecX,y)
+        # print(model.score(vecX, y))
+        # model score = 0.8247 :) same as Random forest Classifier 
+    return model, vectorizer
 
 ### Main funcs ###
 
@@ -93,13 +85,13 @@ def is_match(text1, text2):
     return score < 0.6
 
 ## Get the intent by input text ##
-def get_intent_ml(text, model, vectorizer):
+def get_intent_ml(text):
     vec_text = vectorizer.transform([text])
     intent = model.predict(vec_text)[0]
     return intent
 
 ## Find the intent directly ##
-def get_intent(text, BIG_CONFIG):
+def get_intent(text):
   for name, intent in BIG_CONFIG["intents"].items():
     for example in intent["examples"]:
       if is_match(text, example):
@@ -110,17 +102,17 @@ def get_intent(text, BIG_CONFIG):
 
 
 ## Main bot logic func ##
-def bot(phrase, BIG_CONFIG, model, vectorizer):
+def bot(phrase):
 
     # Filter input data #
     phrase = filter_text(phrase)
 
     # 1) Find the answer directly #
-    intent = get_intent(phrase, BIG_CONFIG)
+    intent = get_intent(phrase)
 
     if not intent:
     # 2) ML  #
-        intent = get_intent_ml(phrase, model, vectorizer)
+        intent = get_intent_ml(phrase)
 
     # If intent found - choose random answer
     if intent:
@@ -131,4 +123,46 @@ def bot(phrase, BIG_CONFIG, model, vectorizer):
     failure = BIG_CONFIG["failure_phrases"]
     return random.choice(failure)
 
-main()
+## TG Bot server logic func ##
+def bot_telegram_reply(update: Update, ctx):
+    
+    text = update.message.text
+    exit_phrases = ["Выйти", "Выключись", "Стоп", "Stop", "Finish", "Exit", "выйти", "выключись", "стоп", "stop", "finish", "exit"]
+
+    if text in exit_phrases:
+        update.message.reply_text("Bye-Bye")
+        exit()
+
+    reply = bot(text)
+    update.message.reply_text(reply)
+    name = update.message.chat.full_name
+    print(f"[{name}] {text}: {reply}")
+
+
+
+# Open bot dictionary #
+config_file = open("big_bot_config.json", "r") 
+BIG_CONFIG = json.load(config_file)
+
+## Use ML func ##
+model, vectorizer = get_model(BIG_CONFIG)
+
+## Conect to TG server ##
+f = open('BOT_KEY.txt')
+BOT_KEY = f.read()
+upd = Updater(BOT_KEY)
+
+## Create MessageHandler ##
+handler = MessageHandler(Filters.text, bot_telegram_reply)
+
+## Register MessageHandler to Updater ##
+upd.dispatcher.add_handler(handler)
+
+print("It works")
+
+## Start polling TG server ##
+
+upd.start_polling()
+upd.idle()
+
+exit()

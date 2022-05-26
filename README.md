@@ -26,4 +26,3 @@ Two words are compared: the input and which the model predicts in the body of th
 
 ### Bot conversation example:
 ![image](https://user-images.githubusercontent.com/57821178/170299578-90d76e38-1a78-4fce-8a43-b945c403f658.png)
-
