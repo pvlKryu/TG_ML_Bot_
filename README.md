@@ -30,4 +30,3 @@ Two words are compared: the input and which the model predicts in the body of th
 As you can see, users names are shown.
 ## Telegram Output:
 ![image](https://user-images.githubusercontent.com/57821178/170508918-813fc066-a24c-4f5a-b348-be7442faab0f.png)
-
