@@ -26,7 +26,7 @@ Two words are compared: the input and which the model predicts in the body of th
 
 ### Bot conversation example:
 ## Server output:
-![image](https://user-images.githubusercontent.com/57821178/170508597-dfba3ccd-40d1-4268-81c1-c7f32be1b43a.png)
+![image](https://user-images.githubusercontent.com/57821178/170508597-dfba3ccd-40d1-4268-81c1-c7f32be1b43a.png) <br>
 As you can see, users names are shown.
 ## Telegram Output:
 ![image](https://user-images.githubusercontent.com/57821178/170508918-813fc066-a24c-4f5a-b348-be7442faab0f.png)
