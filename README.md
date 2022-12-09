@@ -5,7 +5,7 @@ The main idea is try to create a Russian language talkative bot which determines
 A ready-made dictionary of intentions and examples of answers to them was used for bot training (JSON). <br>
 
 ## Models:
-Three different models were tested to determine the user's intention in his phrase. Results below:
+Three different models were tested to determine the user's intention in his phrase. Results are below:
 - Logistic Regression (model score = 0.3884)
 - Random forest Classifier (model score = 0.8281) 
 - MLP Classifier (model score = 0.8247) <br>
